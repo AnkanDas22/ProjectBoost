@@ -10,6 +10,8 @@ public class Rocket : MonoBehaviour {
     AudioSource audio2;
     [SerializeField] float mainThrust = 1000f;
     [SerializeField] float rcsThrust = 100f;
+    bool deathstat = false;
+    bool winstat = false;
 
     // Use this for initialization
     void Start () {
@@ -17,7 +19,9 @@ public class Rocket : MonoBehaviour {
         audioSource = GetComponents<AudioSource>();
         audio1 = audioSource[0];
         audio2 = audioSource[1];
-	}
+        GameObject.Find("DeathNote").transform.localScale = new Vector3(0, 0, 0);
+        GameObject.Find("WinNote").transform.localScale = new Vector3(0, 0, 0);
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -34,10 +38,35 @@ public class Rocket : MonoBehaviour {
             case "Fuel":
                 print("Picked up fuel");
                 break;
+            case "Finish":
+                if (deathstat == true || winstat == true)
+                    break;
+                WinScreen();
+                break;
             default:
-                print("You died");
+                if (winstat == true || deathstat == true)
+                    break;
+                DeathScreen();
                 break;
         }
+    }
+
+    void WinScreen()
+    {
+        print("You won!");
+        GameObject.Find("WinNote").transform.position = transform.position;
+        GameObject.Find("WinNote").transform.localScale = new Vector3(1, 1, 1);
+        GameObject.Find("Backdrop").transform.localScale = new Vector3(0, 0, 0);
+        winstat = true;
+    }
+
+    void DeathScreen()
+    {
+        print("You died!");
+        GameObject.Find("DeathNote").transform.position = transform.position;
+        GameObject.Find("DeathNote").transform.localScale = new Vector3(1, 1, 1);
+        GameObject.Find("Backdrop").GetComponent<Renderer>().material.mainTexture = Resources.Load("Materials/Red") as Texture;
+        deathstat = true;
     }
 
     private void Thrust()
