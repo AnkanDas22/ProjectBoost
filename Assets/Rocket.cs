@@ -93,7 +93,7 @@ public class Rocket : MonoBehaviour {
         else
         {
             audio1.Stop();
-            //audio2.Stop();
+            audio2.Stop();
         }
     }
 
