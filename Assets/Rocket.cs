@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour {
 
@@ -8,8 +9,8 @@ public class Rocket : MonoBehaviour {
     AudioSource[] audioSource;
     AudioSource audio1;
     AudioSource audio2;
-    [SerializeField] float mainThrust = 1000f;
-    [SerializeField] float rcsThrust = 100f;
+    [SerializeField] float mainThrust = 200f;
+    [SerializeField] float rcsThrust = 150f;
     bool deathstat = false;
     bool winstat = false;
 
@@ -21,13 +22,54 @@ public class Rocket : MonoBehaviour {
         audio2 = audioSource[1];
         GameObject.Find("DeathNote").transform.localScale = new Vector3(0, 0, 0);
         GameObject.Find("WinNote").transform.localScale = new Vector3(0, 0, 0);
+        GameObject.Find("Restart").transform.localScale = new Vector3(0, 0, 0);
+        GameObject.Find("Continue").transform.localScale = new Vector3(0, 0, 0);
     }
 	
 	// Update is called once per frame
 	void Update () {
-        Thrust();
-        Rotate();
-	}
+        WinLoss();
+        if (winstat == false && deathstat == false)
+        {
+            Thrust();
+            Rotate();
+        }
+    }
+
+    void WinLoss()
+    {
+        if (winstat == true)
+        {
+            StopAllAudio();
+            GameObject.Find("Continue").transform.localScale = new Vector3(1, 1, 1);
+            GameObject.Find("Restart").transform.localScale = new Vector3(1, 1, 1);
+            if (Input.GetKey(KeyCode.R))
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                winstat = false;
+                deathstat = false;
+                return;
+            }
+            else if (Input.GetKey(KeyCode.Return))
+            {
+                SceneManager.LoadScene(1);
+                winstat = false;
+                deathstat = false;
+                return;
+            }
+        }
+        if (deathstat == true)
+        {
+            StopAllAudio();
+            GameObject.Find("Restart").transform.localScale = new Vector3(1, 1, 1);
+            if (Input.GetKey(KeyCode.R))
+            {
+                SceneManager.LoadScene(0);
+                winstat = false;
+                deathstat = false;
+            }
+        }
+    }
 
     void OnCollisionEnter(Collision collision){
         switch (collision.gameObject.tag)
@@ -55,23 +97,28 @@ public class Rocket : MonoBehaviour {
     {
         print("You won!");
         GameObject.Find("WinNote").transform.position = transform.position;
+        GameObject.Find("Restart").transform.position = transform.position + new Vector3(0, -7, 0);
+        GameObject.Find("Continue").transform.position = transform.position + new Vector3(0, -12, 0);
         GameObject.Find("WinNote").transform.localScale = new Vector3(1, 1, 1);
         GameObject.Find("Backdrop").transform.localScale = new Vector3(0, 0, 0);
         winstat = true;
+        WinLoss();
     }
 
     void DeathScreen()
     {
         print("You died!");
+        GameObject.Find("Restart").transform.position = transform.position + new Vector3(0,-7,0);
         GameObject.Find("DeathNote").transform.position = transform.position;
         GameObject.Find("DeathNote").transform.localScale = new Vector3(1, 1, 1);
         GameObject.Find("Backdrop").GetComponent<Renderer>().material.mainTexture = Resources.Load("Materials/Red") as Texture;
         deathstat = true;
+        WinLoss();
     }
 
     private void Thrust()
     {
-        float forceThisFrame = rcsThrust * Time.deltaTime;
+        float forceThisFrame = mainThrust * Time.deltaTime;
         if (Input.GetKey(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift)) //thrusting
         {
             if (!audio1.isPlaying)
@@ -92,9 +139,14 @@ public class Rocket : MonoBehaviour {
         }
         else
         {
-            audio1.Stop();
-            audio2.Stop();
+            StopAllAudio();
         }
+    }
+
+    void StopAllAudio()
+    {
+        audio1.Stop();
+        audio2.Stop();
     }
 
     private void Rotate()
