@@ -6,20 +6,27 @@ using UnityEngine.SceneManagement;
 public class Rocket : MonoBehaviour {
 
     Rigidbody rigidBody;
-    AudioSource[] audioSource;
-    AudioSource audio1;
-    AudioSource audio2;
+    AudioSource audioSource;
+
     [SerializeField] float mainThrust = 200f;
     [SerializeField] float rcsThrust = 150f;
+
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip revEngine;
+    [SerializeField] AudioClip WinAudio;
+    [SerializeField] AudioClip LoseAudio;
+
+    [SerializeField] ParticleSystem mainEngineParticles;
+    [SerializeField] ParticleSystem successParticles;
+    [SerializeField] ParticleSystem deathParticles;
+
     bool deathstat = false;
     bool winstat = false;
 
     // Use this for initialization
     void Start () {
         rigidBody = GetComponent<Rigidbody>();
-        audioSource = GetComponents<AudioSource>();
-        audio1 = audioSource[0];
-        audio2 = audioSource[1];
+        audioSource = GetComponent<AudioSource>();
         GameObject.Find("DeathNote").transform.localScale = new Vector3(0, 0, 0);
         GameObject.Find("WinNote").transform.localScale = new Vector3(0, 0, 0);
         GameObject.Find("Restart").transform.localScale = new Vector3(0, 0, 0);
@@ -40,7 +47,6 @@ public class Rocket : MonoBehaviour {
     {
         if (winstat == true)
         {
-            StopAllAudio();
             GameObject.Find("Continue").transform.localScale = new Vector3(1, 1, 1);
             GameObject.Find("Restart").transform.localScale = new Vector3(1, 1, 1);
             if (Input.GetKey(KeyCode.R))
@@ -60,7 +66,6 @@ public class Rocket : MonoBehaviour {
         }
         if (deathstat == true)
         {
-            StopAllAudio();
             GameObject.Find("Restart").transform.localScale = new Vector3(1, 1, 1);
             if (Input.GetKey(KeyCode.R))
             {
@@ -87,7 +92,7 @@ public class Rocket : MonoBehaviour {
                 break;
             default:
                 if (winstat == true || deathstat == true)
-                    break;
+                    break; 
                 DeathScreen();
                 break;
         }
@@ -95,10 +100,13 @@ public class Rocket : MonoBehaviour {
 
     void WinScreen()
     {
+        mainEngineParticles.Stop();
+        successParticles.Play();
+        audioSource.PlayOneShot(WinAudio);
         print("You won!");
-        GameObject.Find("WinNote").transform.position = transform.position;
-        GameObject.Find("Restart").transform.position = transform.position + new Vector3(0, -7, 0);
-        GameObject.Find("Continue").transform.position = transform.position + new Vector3(0, -12, 0);
+        GameObject.Find("WinNote").transform.position = transform.position + new Vector3(0, 5, 0);
+        GameObject.Find("Restart").transform.position = transform.position + new Vector3(0, -2, 0);
+        GameObject.Find("Continue").transform.position = transform.position + new Vector3(0, -7, 0);
         GameObject.Find("WinNote").transform.localScale = new Vector3(1, 1, 1);
         GameObject.Find("Backdrop").transform.localScale = new Vector3(0, 0, 0);
         winstat = true;
@@ -107,6 +115,9 @@ public class Rocket : MonoBehaviour {
 
     void DeathScreen()
     {
+        mainEngineParticles.Stop();
+        deathParticles.Play();
+        audioSource.PlayOneShot(LoseAudio);
         print("You died!");
         GameObject.Find("Restart").transform.position = transform.position + new Vector3(0,-7,0);
         GameObject.Find("DeathNote").transform.position = transform.position;
@@ -116,37 +127,58 @@ public class Rocket : MonoBehaviour {
         WinLoss();
     }
 
+    private void AddThrust2X(float forceThisFrame)
+    {
+        if (!audioSource.isPlaying)
+            audioSource.PlayOneShot(mainEngine);
+        rigidBody.AddRelativeForce(Vector3.up * forceThisFrame * 2f);
+    }
+
+    private void AddThrust(float forceThisFrame)
+    {
+        if (!audioSource.isPlaying)
+            audioSource.PlayOneShot(mainEngine);
+        rigidBody.AddRelativeForce(Vector3.up * forceThisFrame);
+    }
+
+    private void AddDownthrust(float forceThisFrame)
+    {
+        if (!audioSource.isPlaying)
+            audioSource.PlayOneShot(revEngine);
+        rigidBody.AddRelativeForce(Vector3.down * forceThisFrame);
+    }
+
     private void Thrust()
     {
         float forceThisFrame = mainThrust * Time.deltaTime;
         if (Input.GetKey(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift)) //thrusting
         {
-            if (!audio1.isPlaying)
-                audio1.Play();
-            rigidBody.AddRelativeForce(Vector3.up * forceThisFrame * 2f);
+            AddThrust2X(forceThisFrame);
+            mainEngineParticles.Play();
         }
         else if (Input.GetKey(KeyCode.Space)) //thrusting
         {
-            if (!audio1.isPlaying)
-                audio1.Play();
-            rigidBody.AddRelativeForce(Vector3.up * forceThisFrame);
+            AddThrust(forceThisFrame);
+            mainEngineParticles.Play();
         }
         else if (Input.GetKey(KeyCode.S)) //rotating right regardless of thrusting
         {
-            if (!audio2.isPlaying)
-                audio2.Play();
-            rigidBody.AddRelativeForce(Vector3.down * forceThisFrame);
+            AddDownthrust(forceThisFrame);
+            mainEngineParticles.Play();
         }
         else
         {
             StopAllAudio();
+            mainEngineParticles.Stop();
         }
     }
 
     void StopAllAudio()
     {
-        audio1.Stop();
-        audio2.Stop();
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
     }
 
     private void Rotate()

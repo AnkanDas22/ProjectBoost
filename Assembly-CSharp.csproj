@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\CameraController.cs" />
+     <Compile Include="Assets\Oscillator.cs" />
      <Compile Include="Assets\Rocket.cs" />
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>D:/Love/Unity Projects/3_Project_Boost/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>

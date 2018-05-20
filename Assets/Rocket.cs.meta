@@ -1,11 +1,16 @@
 fileFormatVersion: 2
 guid: 4c6aa528ee53eae42ab201c50fcce406
-timeCreated: 1524246021
-licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - mainEngine: {fileID: 8300000, guid: da153818f1dc48d498ea2790d77beb13, type: 3}
+  - revEngine: {fileID: 8300000, guid: 6c30d324554bc714eb331db711df28a2, type: 3}
+  - WinAudio: {fileID: 8300000, guid: e8f42ad132a908e47b9a56fba5da8798, type: 3}
+  - LoseAudio: {fileID: 8300000, guid: f3eaf80b550ce62408bbaa598ea87d3c, type: 3}
+  - mainEngineParticles: {instanceID: 0}
+  - successParticles: {instanceID: 0}
+  - deathParticles: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
